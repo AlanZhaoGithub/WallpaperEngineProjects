@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+
+	<style>
+	body{
+		overflow: hidden;
+		padding: 0px;
+		margin: 0px;
+	}
+	
+	canvas{
+		padding: 0px;
+		margin: 0px;
+		position: absolute;
+		top: 0px;
+		left: 0px;
+	}
+	
+	img{
+		display:none;
+		visibility: hidden;
+	}
+	
+	audiobars{
+		z-index:2;
+	}
+
+	wallpaper{
+		z-index: 1;
+	}
+
+	</style>
+	<body>
+			<div class = "wallpaper">
+				<canvas id = "cWall" width = "1366" height = "768"> </canvas>
+				<img id = "miku" src = "images/miku.jpg" width = "1366" height = "768">
+			</div>
+			
+			<div class = "audiobars">
+				<canvas id = "bWall" width = "1366" height = "768"> </canvas>
+			</div>
+	<body>
+	
+	<script>
+		function wallpaperAudioListener(audioArray){
+			draw(audioArray);
+		}
+
+		function draw(audioArray)
+		{
+			var x,y,sr,br;
+			x = 1150;
+			y = 225;
+			sr = 50;
+			br = 200;
+			drawCircle(x,y,sr,br,audioArray);
+
+		}
+		
+		function drawCircle(x,y,sr,br, audioArray)
+		{
+			var bCanvas = document.getElementById("bWall");
+			
+			var bCanvasCtx = bCanvas.getContext("2d");
+			bCanvasCtx.clearRect(0,0,1366,768);
+			bCanvasCtx.lineWidth = 7;
+			bCanvasCtx.fillStyle = 'rgb(105, 213, 236)';
+			bCanvasCtx.strokeStyle = 'rgb(105, 213, 236)';
+			bCanvasCtx.beginPath();
+			bCanvasCtx.arc(x, y, 50, 0, 2 * Math.PI);
+			bCanvasCtx.fill();
+			bCanvasCtx.stroke();
+			bCanvasCtx.lineWidth = 4;
+			bCanvasCtx.translate(x,y);
+			var max = 0;
+			for (var i = 0; i < audioArray.length; ++i){
+				if (audioArray[i] > max){
+					max = audioArray[i];
+				}
+			}
+			var normalizer = Math.pow(max,-1);
+			
+			for (var i = 0; i < 45; ++i) {
+			  bCanvasCtx.beginPath();
+			  bCanvasCtx.lineTo(-1,sr);
+			  bCanvasCtx.lineTo(-1,br - br * (audioArray[i * 2] + audioArray[i]) * normalizer);
+			  bCanvasCtx.quadraticCurveTo(0,br - br * (audioArray[i * 2] + audioArray[i] * normalizer) + 5, 1,br - br * (audioArray[i * 2] + audioArray[i]) * normalizer);
+			  bCanvasCtx.lineTo(1,sr);
+			  bCanvasCtx.fill();
+			  bCanvasCtx.stroke();
+			  bCanvasCtx.fillStyle = 'rgb(105, 213, 236)';
+			  
+			  
+			  bCanvasCtx.rotate(8* Math.PI / 180);
+			}
+			bCanvasCtx.translate(-x,-y);
+			
+		}
+		
+		function drawSBars(audioArray)
+		{
+			var bCanvas = document.getElementById("bWall");
+			
+			var bCanvasCtx = bCanvas.getContext("2d");
+			
+			var barWidth = Math.round(1.0 / 128.0 * bCanvas.width);
+			
+			var halfCount = audioArray.length / 2;
+			
+			bCanvasCtx.clearRect(0,0,1366,768);
+			
+			bCanvasCtx.fillStyle = 'rgb(105,213,236)';
+			
+			for (var i = 0; i < halfCount; ++i) {
+				var height = bCanvas.height * audioArray[i];
+				bCanvasCtx.fillRect(barWidth * i, bCanvas.height - height, barWidth, height);
+			}
+
+			for (var i = halfCount; i < audioArray.length; ++i) {
+				var height = bCanvas.height * audioArray[191 - i];
+				bCanvasCtx.fillRect(barWidth * i, bCanvas.height - height, barWidth, height);
+			}	
+		}
+
+		function loadBackground()
+		{
+			var wCanvas = document.getElementById("cWall");
+			
+			var wCanvasCtx = wCanvas.getContext("2d");
+				
+			var wImg = document.getElementById("miku");
+			
+			wCanvasCtx.drawImage(wImg,0,0,1366,768);
+		}
+		
+		window.onload = function(){
+			window.wallpaperRegisterAudioListener(wallpaperAudioListener);
+			loadBackground();
+	};
+	
+	</script>
+
+</html>
